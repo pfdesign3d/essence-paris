@@ -1,0 +1,11 @@
+# SSL сертификаты не нужны для GitHub Pages (HTTPS выдаётся автоматически)
+SSL/
+
+# внутренние рабочие документы — не для публичного репозитория
+PROJECT_CONTEXT.md
+TEXTES.md
+ESSENCE_PARIS_CONTENT_AND_TZ.md
+
+# системный мусор
+.DS_Store
+Thumbs.db

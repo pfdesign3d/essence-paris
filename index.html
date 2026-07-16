@@ -447,7 +447,6 @@
 <!-- ============ HERO ============ -->
 <section class="hero">
   <video class="hero-video" id="heroVideo" autoplay muted loop playsinline poster="img/posters/004-HEADER-16x9.jpg" aria-hidden="true">
-    <source src="video/004-HEADER-9x16.mp4" type="video/mp4" media="(max-width:720px)">
     <source src="video/004-HEADER-16x9.mp4" type="video/mp4">
   </video>
   <button class="hero-sound" id="heroSoundBtn" type="button" data-i18n-aria-label="hero.soundOnLabel" aria-label="Activer le son">
@@ -1012,8 +1011,16 @@
   var heroVideo=document.getElementById('heroVideo');
   var heroSoundBtn=document.getElementById('heroSoundBtn');
   if(heroVideo){
-    heroVideo.poster=window.matchMedia('(max-width:720px)').matches
-      ?'img/posters/004-HEADER-9x16.jpg':'img/posters/004-HEADER-16x9.jpg';
+    var heroIsMobile=window.matchMedia('(max-width:720px)').matches;
+    heroVideo.poster=heroIsMobile?'img/posters/004-HEADER-9x16.jpg':'img/posters/004-HEADER-16x9.jpg';
+    // <source media="..."> is unreliable for autoplay on some mobile browsers —
+    // pick the file in JS instead and reload before the browser commits to the default.
+    if(heroIsMobile){
+      var heroSource=heroVideo.querySelector('source');
+      heroSource.src='video/004-HEADER-9x16.mp4';
+      heroVideo.load();
+      heroVideo.play().catch(function(){});
+    }
   }
   if(heroVideo&&heroSoundBtn){
     heroSoundBtn.addEventListener('click',function(){

@@ -110,6 +110,12 @@
   .nav-mail{display:flex;color:inherit;opacity:.7;transition:opacity .25s ease}
   .nav-mail:hover{opacity:1}
   .nav-mail svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6}
+  /* on mobile the right-anchored nav-utils sits too close to the centered logo —
+     detach the mail icon to the opposite (left) side of the header */
+  @media(max-width:720px){
+    .nav-mail{position:fixed;top:38px;left:var(--pad);z-index:2;transition:opacity .25s ease,top .5s ease}
+    header.nav.scrolled .nav-mail{top:19px}
+  }
   .lang-switch{display:flex;align-items:center;gap:6px;
     font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:inherit}
   .lang-switch .sep{opacity:.4}

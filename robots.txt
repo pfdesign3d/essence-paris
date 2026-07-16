@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://essence-paris.store/sitemap.xml

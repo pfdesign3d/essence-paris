@@ -135,6 +135,16 @@
     background:#E7C079;opacity:.8}
   .hero .punch-lines{display:flex;flex-direction:column;gap:4px;text-align:right}
   .hero .punch-sub{font-size:.86em;opacity:.85}
+  .hero-sound{position:absolute;left:var(--pad);bottom:26px;z-index:2;
+    width:40px;height:40px;border-radius:50%;
+    background:rgba(20,16,11,.4);border:1px solid rgba(244,240,231,.35);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .3s ease,opacity .3s ease}
+  .hero-sound:hover{background:rgba(20,16,11,.65)}
+  .hero-sound svg{width:18px;height:18px;fill:none;stroke:var(--paper);stroke-width:1.6;position:absolute}
+  .hero-sound .icon-off{opacity:0}
+  .hero-sound.is-on .icon-on{opacity:0}
+  .hero-sound.is-on .icon-off{opacity:1}
   .scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
     z-index:2;font-family:var(--mono);font-size:9px;letter-spacing:.3em;
     color:var(--paper);opacity:.7;text-transform:uppercase;text-align:center}
@@ -415,9 +425,14 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero">
-  <video class="hero-video" autoplay muted loop playsinline poster="img/posters/003-HEADER-web.jpg" aria-hidden="true">
-    <source src="video/003-HEADER-web.mp4" type="video/mp4">
+  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline poster="img/posters/004-HEADER-16x9.jpg" aria-hidden="true">
+    <source src="video/004-HEADER-9x16.mp4" type="video/mp4" media="(max-width:720px)">
+    <source src="video/004-HEADER-16x9.mp4" type="video/mp4">
   </video>
+  <button class="hero-sound" id="heroSoundBtn" type="button" data-i18n-aria-label="hero.soundOnLabel" aria-label="Activer le son">
+    <svg class="icon-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke-linecap="round"/></svg>
+    <svg class="icon-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6" fill="none" stroke-linecap="round"/></svg>
+  </button>
   <div class="scrim"></div>
   <div class="hero-inner">
     <div class="kicker" data-i18n="hero.kicker">Été–Automne 2026</div>
@@ -756,6 +771,8 @@
       'hero.kicker':'Été–Automne 2026',
       'hero.punchLine2':'La nouvelle collection',
       'hero.scrollCue':'Découvrir',
+      'hero.soundOnLabel':'Activer le son',
+      'hero.soundOffLabel':'Couper le son',
       'collection.heading':'La Collection',
       'collection.sub1':'Six essences',
       'collection.sub2':'Disponibles selon les arrivages',
@@ -797,6 +814,8 @@
       'hero.kicker':'Лето–осень 2026',
       'hero.punchLine2':'Новая коллекция',
       'hero.scrollCue':'Открыть',
+      'hero.soundOnLabel':'Включить звук',
+      'hero.soundOffLabel':'Выключить звук',
       'collection.heading':'Коллекция',
       'collection.sub1':'Шесть ароматов',
       'collection.sub2':'Доступны по мере поступления',
@@ -964,6 +983,23 @@
     if(!reduceMotion){
       window.addEventListener('scroll',updateDrop,{passive:true});
     }
+  }
+
+  // hero video — poster matched to the active source (portrait vs landscape) + manual sound toggle
+  var heroVideo=document.getElementById('heroVideo');
+  var heroSoundBtn=document.getElementById('heroSoundBtn');
+  if(heroVideo){
+    heroVideo.poster=window.matchMedia('(max-width:720px)').matches
+      ?'img/posters/004-HEADER-9x16.jpg':'img/posters/004-HEADER-16x9.jpg';
+  }
+  if(heroVideo&&heroSoundBtn){
+    heroSoundBtn.addEventListener('click',function(){
+      heroVideo.muted=!heroVideo.muted;
+      heroSoundBtn.classList.toggle('is-on',!heroVideo.muted);
+      var key=heroVideo.muted?'hero.soundOnLabel':'hero.soundOffLabel';
+      heroSoundBtn.setAttribute('data-i18n-aria-label',key);
+      heroSoundBtn.setAttribute('aria-label',essenceT(key));
+    });
   }
 
   // film player — custom play button (sound on) + fullscreen

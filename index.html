@@ -97,12 +97,16 @@
   /* touch devices have no hover — keep the menu visible */
   @media(hover:none){.nav-links{max-height:40px;opacity:1;transform:none;margin-top:16px;pointer-events:auto}}
 
-  /* language switch — persistent (not tied to the hover-reveal menu), top-right corner */
-  .lang-switch{position:absolute;top:38px;right:var(--pad);z-index:2;
-    display:flex;align-items:center;gap:6px;
-    font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  /* language switch + mail icon — persistent (not tied to the hover-reveal menu), top-right corner */
+  .nav-utils{position:absolute;top:38px;right:var(--pad);z-index:2;
+    display:flex;align-items:center;gap:16px;
     color:var(--paper);transition:color .5s ease,top .5s ease}
-  header.nav.scrolled .lang-switch{color:var(--ink);top:19px}
+  header.nav.scrolled .nav-utils{color:var(--ink);top:19px}
+  .nav-mail{display:flex;color:inherit;opacity:.7;transition:opacity .25s ease}
+  .nav-mail:hover{opacity:1}
+  .nav-mail svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6}
+  .lang-switch{display:flex;align-items:center;gap:6px;
+    font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:inherit}
   .lang-switch .sep{opacity:.4}
   .lang-btn{background:none;border:none;padding:2px 3px;margin:0;cursor:pointer;
     font:inherit;color:inherit;opacity:.55;transition:opacity .25s ease}
@@ -407,10 +411,15 @@
       </g>
     </svg>
   </a>
-  <div class="lang-switch" role="group" aria-label="Langue du site / Язык сайта">
-    <button type="button" class="lang-btn is-active" data-lang-btn="fr" aria-pressed="true">FR</button>
-    <span class="sep" aria-hidden="true">/</span>
-    <button type="button" class="lang-btn" data-lang-btn="ru" aria-pressed="false">RU</button>
+  <div class="nav-utils">
+    <a class="nav-mail" href="mailto:hello@essence-paris.store" data-i18n-aria-label="nav.mailLabel" aria-label="Nous écrire">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z"/><path d="M4 7l8 6 8-6"/></svg>
+    </a>
+    <div class="lang-switch" role="group" aria-label="Langue du site / Язык сайта">
+      <button type="button" class="lang-btn is-active" data-lang-btn="fr" aria-pressed="true">FR</button>
+      <span class="sep" aria-hidden="true">/</span>
+      <button type="button" class="lang-btn" data-lang-btn="ru" aria-pressed="false">RU</button>
+    </div>
   </div>
   <nav class="nav-links">
     <a href="#collection" data-i18n="nav.collection">La Collection</a>
@@ -769,6 +778,7 @@
       'nav.collection':'La Collection',
       'nav.maison':'La Maison',
       'nav.film':'Le Film',
+      'nav.mailLabel':'Nous écrire',
       'hero.kicker':'Été–Automne 2026',
       'hero.punchLine2':'La nouvelle collection',
       'hero.scrollCue':'Découvrir',
@@ -812,6 +822,7 @@
       'nav.collection':'Коллекция',
       'nav.maison':'Дом ESSENCE',
       'nav.film':'Фильм',
+      'nav.mailLabel':'Написать нам',
       'hero.kicker':'Лето–осень 2026',
       'hero.punchLine2':'Новая коллекция',
       'hero.scrollCue':'Открыть',

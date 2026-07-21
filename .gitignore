@@ -5,6 +5,7 @@ SSL/
 PROJECT_CONTEXT.md
 TEXTES.md
 ESSENCE_PARIS_CONTENT_AND_TZ.md
+TZ_*.md
 
 # системный мусор
 .DS_Store

@@ -479,9 +479,7 @@
 
 <!-- ============ HERO ============ -->
 <section class="hero">
-  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline poster="img/posters/004-HEADER-16x9.jpg" aria-hidden="true">
-    <source src="video/004-HEADER-16x9.mp4" type="video/mp4">
-  </video>
+  <video class="hero-video" id="heroVideo" autoplay muted loop playsinline poster="img/posters/004-HEADER-16x9.jpg" aria-hidden="true"></video>
   <button class="hero-sound" id="heroSoundBtn" type="button" data-i18n-aria-label="hero.soundOnLabel" aria-label="Activer le son">
     <svg class="icon-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke-linecap="round"/></svg>
     <svg class="icon-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16 9l5 6M21 9l-5 6" fill="none" stroke-linecap="round"/></svg>
@@ -1040,20 +1038,86 @@
     }
   }
 
-  // hero video — poster matched to the active source (portrait vs landscape) + manual sound toggle
+  // hero video — resilient source/poster selection + autoplay with a one-time interaction fallback
   var heroVideo=document.getElementById('heroVideo');
   var heroSoundBtn=document.getElementById('heroSoundBtn');
   if(heroVideo){
-    var heroIsMobile=window.matchMedia('(max-width:720px)').matches;
-    heroVideo.poster=heroIsMobile?'img/posters/004-HEADER-9x16.jpg':'img/posters/004-HEADER-16x9.jpg';
-    // <source media="..."> is unreliable for autoplay on some mobile browsers —
-    // pick the file in JS instead and reload before the browser commits to the default.
-    if(heroIsMobile){
-      var heroSource=heroVideo.querySelector('source');
-      heroSource.src='video/004-HEADER-9x16.mp4';
+    var HERO_SOURCES={
+      mobile:{video:'video/004-HEADER-9x16.mp4',poster:'img/posters/004-HEADER-9x16.jpg'},
+      desktop:{video:'video/004-HEADER-16x9.mp4',poster:'img/posters/004-HEADER-16x9.jpg'}
+    };
+    var heroIsMobile=function(){ return window.matchMedia('(max-width:720px)').matches; };
+    var heroCurrentMode=null;
+    var heroStarted=false;
+    var heroRetriedOnEvent=false;
+    var heroFallbackActive=false;
+
+    var heroFallbackHandler=function(){
+      if(heroStarted) return;
+      heroAttemptPlay();
+    };
+    var heroAddFallbackListeners=function(){
+      if(heroFallbackActive) return;
+      heroFallbackActive=true;
+      document.addEventListener('pointerdown',heroFallbackHandler,{passive:true});
+      document.addEventListener('touchstart',heroFallbackHandler,{passive:true});
+      document.addEventListener('keydown',heroFallbackHandler);
+    };
+    var heroRemoveFallbackListeners=function(){
+      if(!heroFallbackActive) return;
+      heroFallbackActive=false;
+      document.removeEventListener('pointerdown',heroFallbackHandler);
+      document.removeEventListener('touchstart',heroFallbackHandler);
+      document.removeEventListener('keydown',heroFallbackHandler);
+    };
+
+    var heroAttemptPlay=function(){
+      var result=heroVideo.play();
+      if(result&&typeof result.catch==='function'){
+        result.then(function(){
+          heroStarted=true;
+          heroRemoveFallbackListeners();
+        }).catch(function(err){
+          console.warn('hero video autoplay deferred:',err&&err.name);
+          if(!heroRetriedOnEvent){
+            heroRetriedOnEvent=true;
+            var onReady=function(){
+              heroVideo.removeEventListener('canplay',onReady);
+              heroVideo.removeEventListener('loadeddata',onReady);
+              if(!heroStarted) heroAttemptPlay();
+            };
+            heroVideo.addEventListener('canplay',onReady);
+            heroVideo.addEventListener('loadeddata',onReady);
+          }
+          heroAddFallbackListeners();
+        });
+      }
+    };
+
+    var heroApplySource=function(){
+      var mode=heroIsMobile()?'mobile':'desktop';
+      if(mode===heroCurrentMode) return;
+      heroCurrentMode=mode;
+      heroStarted=false;
+      heroRetriedOnEvent=false;
+      var pick=HERO_SOURCES[mode];
+      heroVideo.muted=true;
+      heroVideo.defaultMuted=true;
+      heroVideo.playsInline=true;
+      heroVideo.setAttribute('muted','');
+      heroVideo.setAttribute('playsinline','');
+      heroVideo.poster=pick.poster;
+      heroVideo.src=pick.video;
       heroVideo.load();
-      heroVideo.play().catch(function(){});
-    }
+      heroAttemptPlay();
+    };
+
+    heroApplySource();
+    var heroResizeTimer=null;
+    window.addEventListener('resize',function(){
+      clearTimeout(heroResizeTimer);
+      heroResizeTimer=setTimeout(heroApplySource,200);
+    });
   }
   if(heroVideo&&heroSoundBtn){
     heroSoundBtn.addEventListener('click',function(){
@@ -1062,6 +1126,7 @@
       var key=heroVideo.muted?'hero.soundOnLabel':'hero.soundOffLabel';
       heroSoundBtn.setAttribute('data-i18n-aria-label',key);
       heroSoundBtn.setAttribute('aria-label',essenceT(key));
+      if(heroVideo.paused) heroVideo.play().catch(function(err){ console.warn('hero video play on sound toggle failed:',err&&err.name); });
     });
   }
 
